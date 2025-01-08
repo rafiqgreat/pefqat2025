@@ -64,13 +64,14 @@ class Login extends CI_Controller
             $result = $this->login_model->loginMe($email, $password);
             
             if(!empty($result))
-            {
+            {				
                 $lastLogin = $this->login_model->lastLoginInfo($result->userId);
                 $sessionArray = array('userId'=>$result->userId,                    
                                         'role'=>$result->roleId,
                                         'roleText'=>$result->role,
                                         'name'=>$result->name,
-									  	'district'=>$result->district,                                       
+									  	'district'=>$result->district,  
+									  'district_name'=>$result->district_name,
                                         'isLoggedIn' => TRUE
                                 );
                 $this->session->set_userdata($sessionArray);

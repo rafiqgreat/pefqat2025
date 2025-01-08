@@ -18,7 +18,56 @@ class School extends BaseController
         $this->load->model('school_model');
         $this->isLoggedIn();   
     }
+    /**
+     * This function is used to load the exam  center
+     */
+	function centerListing()
+    {
+        if($this->isAdmin() == FALSE)
+        {
+			$searchText = $this->security->xss_clean($this->input->post('searchText'));
+            $data['searchText'] = $searchText;
+            
+            $this->load->library('pagination');
+            
+            $count = $this->Center_model->centerListingCount($searchText);
+			$returns = $this->paginationCompress ( "centerListing/", $count, 10 );
+            
+            $data['schoolRecords'] = $this->Center_model->centerListing($searchText, $returns["page"], $returns["segment"]);
+				// Get the total number of records
+    		 $total_schools = $this->Center_model->count_records();
+			
+			 $data['total_records'] = $total_schools[0]->totalschools;
+			
+            $this->global['pageTitle'] = 'PEC : Center Listing';
+            
+            $this->loadViews("centers", $this->global, $data, NULL);
+		}
+		else if ($this->isCEO() == FALSE)
+		{
         
+			$total_centers = $this->Center_model->centerListingCountCEO();
+			$data['total_records'] = $total_centers;  
+			$searchText = $this->security->xss_clean($this->input->post('searchText'));
+			$data['searchText'] = $searchText;
+            
+            $this->load->library('pagination');
+            
+            $count = $this->Center_model->centerListingCountCEO($searchText);
+			$returns = $this->paginationCompress ( "centerListing/", $count, 10 );
+            
+            $data['schoolRecords'] = $this->Center_model->centerListingCEO($searchText, $returns["page"], $returns["segment"]);
+            $this->global['pageTitle'] = 'PEC : Center Listing';
+            
+            $this->loadViews("centers", $this->global, $data, NULL);
+        }
+        else
+        {        
+			 $this->loadThis();
+			
+        }
+    }
+	  
     /**
      * This function is used to load the user list
      */
