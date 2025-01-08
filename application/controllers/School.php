@@ -46,8 +46,9 @@ class School extends BaseController
 		}
 		else if ($this->isCEO() == FALSE)
 		{
+        
 			$total_schools = $this->school_model->schoolListingCountCEO();
-			$data['total_records'] = $total_schools;           
+			$data['total_records'] = $total_schools;  
 			$searchText = $this->security->xss_clean($this->input->post('searchText'));
 			$data['searchText'] = $searchText;
             
@@ -57,7 +58,6 @@ class School extends BaseController
 			$returns = $this->paginationCompress ( "schoolListing/", $count, 10 );
             
             $data['schoolRecords'] = $this->school_model->schoolListingCEO($searchText, $returns["page"], $returns["segment"]);
-            
             $this->global['pageTitle'] = 'PEC : Schools Listing';
             
             $this->loadViews("schools", $this->global, $data, NULL);
