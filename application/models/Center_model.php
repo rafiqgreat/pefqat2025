@@ -18,6 +18,19 @@ class Center_model extends CI_Model
             $query = $this->db->get();
             return $query->num_rows();
         }
+        function getCenterInfoById($centerId)
+    {
+        $this->db->select('*');
+        $this->db->from('tbl_examcenter');
+        $this->db->where('cid', $centerId);
+        $query = $this->db->get();
+        
+        return $query->row();
+    }
+         public function deleteCenterById($centerId){
+            $this->db->where('cid', $centerId);
+        return $this->db->delete('tbl_examcenter'); 
+         }
     
         function centerListing($searchText = '', $page, $segment)
         {
@@ -30,13 +43,18 @@ class Center_model extends CI_Model
                 BaseTbl.cdistrict_id, 
                 DistrictTbl.district_name_en as districtName,
                 BaseTbl.cteshil_id, 
-                TehsilTbl.tehsil_name_en as tehsilName
-                
+                TehsilTbl.tehsil_name_en as tehsilName,
+					 school_name,
+					 username,
+					 cpefschools_total,
+					 cpef_students_avail,
+					 cpef_students_selected                
             ');
             $this->db->from('tbl_examcenter as BaseTbl');
             $this->db->join('tbl_roles as Role', 'Role.roleId = BaseTbl.ccreatedby', 'left');
             $this->db->join('tbl_district as DistrictTbl', 'DistrictTbl.district_id = BaseTbl.cdistrict_id', 'left');
             $this->db->join('tbl_tehsil as TehsilTbl', 'TehsilTbl.tehsil_id = BaseTbl.cteshil_id', 'left');
+				$this->db->join('tbl_schools_sed', 'school_id = BaseTbl.csedschool_id', 'left');
             // Apply search criteria if provided
             if (!empty($searchText)) {
                 $likeCriteria = "(BaseTbl.ccode LIKE '%" . $searchText . "%'
@@ -82,7 +100,15 @@ class Center_model extends CI_Model
             $result = $query->result();
             return $result;
         }
-
+		  
+		  public function getCenterStaffByCenterId($staff_cid)
+        {
+            $this->db->select('*');
+            $this->db->from('tbl_staff');
+            $this->db->where('staff_cid', $staff_cid);
+            $query = $this->db->get();
+            return $query->num_rows();
+        }
 	
         function getCenterDistricts()
         {
@@ -237,16 +263,6 @@ class Center_model extends CI_Model
             
             $result = $query->result();        
             return $result;
-        }
-        function getCenterInfoById($centerId)
-        {
-            $this->db->select('centerId, name, email, mobile, roleId');
-            $this->db->from('tbl_centers');
-            $this->db->where('isDeleted', 0);
-            $this->db->where('centerId', $centerId);
-            $query = $this->db->get();
-            
-            return $query->row();
         }
         function getCenterInfoWithRole($centerId)
         {

@@ -15,15 +15,13 @@ class Pef_School extends BaseController
         public function __construct()
         {
             parent::__construct();
-            $this->load->model('pef_school_model');
+            $this->load->model('Pef_School_model','pef_school_model');		
             $this->isLoggedIn();   
         }
         public function addSchoolForm()
         {
-
             if ($this->isAdmin() === TRUE || $this->isCEO() === TRUE) {
             $data['districts'] = $this->pef_school_model->getAllDistricts();
-
             // By default, load tehsils for the first district (optional)
             $firstDistrictId = !empty($data['districts']) ? $data['districts'][0]->district_id : null;
             $data['tehsils'] = $firstDistrictId ? $this->pef_school_model->getTehsilsByDistrict($firstDistrictId) : [];
@@ -33,7 +31,6 @@ class Pef_School extends BaseController
                 $this->loadThis();
             }
         }
-
        public function addSchool()
         {
         // Check if the user has admin privileges
@@ -48,27 +45,20 @@ class Pef_School extends BaseController
             $this->form_validation->set_rules('s_address', 'School Address', 'trim|required|max_length[255]');
             $this->form_validation->set_rules('s_district_id', 'District ID', 'trim|required|numeric');
             $this->form_validation->set_rules('s_tehsil_id', 'Tehsil ID', 'trim|required|numeric');
-
             $this->form_validation->set_rules('s_level', 'School Level', 'trim|required|max_length[25]');
             $this->form_validation->set_rules('s_status', 'Status', 'trim|required|numeric');
-
             $this->form_validation->set_rules('s_owner_name', 'Owner Name', 'trim|required|max_length[255]');
             $this->form_validation->set_rules('s_owner_cell', 'Owner Cell', 'trim|required|max_length[20]');
             $this->form_validation->set_rules('s_email', 'Email', 'trim|valid_email|max_length[255]');
-
             $this->form_validation->set_rules('username', 'Username', 'trim|max_length[255]');
             $this->form_validation->set_rules('password', 'Password', 'trim|max_length[255]');
-
             $this->form_validation->set_rules('s_department', 'Department', 'trim|max_length[100]');
             $this->form_validation->set_rules('s_type', 'Type', 'trim|max_length[100]');
             $this->form_validation->set_rules('s_gender', 'Gender', 'trim|max_length[100]');
-
             $this->form_validation->set_rules('s_lat', 'Latitude', 'trim|required|decimal');
             $this->form_validation->set_rules('s_long', 'Longitude', 'trim|required|decimal');
-
             if ($this->form_validation->run() === FALSE) {
                     $data['districts'] = $this->pef_school_model->getAllDistricts();
-
                 // By default, load tehsils for the first district (optional)
                 $firstDistrictId = !empty($data['districts']) ? $data['districts'][0]->district_id : null;
                 $data['tehsils'] = $firstDistrictId ? $this->pef_school_model->getTehsilsByDistrict($firstDistrictId) : [];
@@ -88,29 +78,23 @@ class Pef_School extends BaseController
                     's_tehsil_id'   => $this->input->post('s_tehsil_id'),
                     's_level'       => $this->input->post('s_level'),
                     's_status'      => $this->input->post('s_status'),
-
                     // Owner Information
                     's_owner_name'  => $this->input->post('s_owner_name'),
                     's_owner_cell'  => $this->input->post('s_owner_cell'),
                     's_email'       => $this->input->post('s_email'),
-
                     // User Credentials
                     'username'      => $this->input->post('username'),
                     'password'      => $this->input->post('password'),
-
                     // Additional Information
                     's_department'  => $this->input->post('s_department'),
                     's_type'        => $this->input->post('s_type'),
                     's_gender'      => $this->input->post('s_gender'),
-
                     // Location Data
                     's_lat'         => $this->input->post('s_lat'),
                     's_long'        => $this->input->post('s_long'),
                 );
-
                 // Save data to the database
                 $result = $this->pef_school_model->insertSchool($schoolData);
-
                 // Flash message based on the result
                 if ($result) {
                     $this->session->set_flashdata('success', 'School added successfully.');
@@ -118,7 +102,6 @@ class Pef_School extends BaseController
                 else {
                     $this->session->set_flashdata('error', 'Failed to add school.');
                 }
-
                 // Redirect to the school listing page
                 redirect('Pef_School/PefschoolListing');
                     }
@@ -198,8 +181,6 @@ class Pef_School extends BaseController
                 $this->loadThis();
             }
         }
-
-
   
      /**
      * This function is used to check whether email already exist or not
@@ -245,7 +226,6 @@ class Pef_School extends BaseController
             $this->loadThis();
         }
     }
-
     public function editPefSchool($schoolId = NULL)
     {
         if ($this->isAdmin() == FALSE ||$this->isCEO() == FALSE) {
@@ -258,7 +238,6 @@ class Pef_School extends BaseController
             // Pass district and tehsil data to view
             $data['districts'] = $this->pef_school_model->getAllDistricts();
             $data['tehsils'] = $this->pef_school_model->getTehsilsByDistrict($data['schoolInfo']->s_district_id);
-
             $this->global['pageTitle'] = 'PEF : Edit School';
             $this->loadViews("editPefSchoolInfo", $this->global, $data, NULL);
         } else {
@@ -270,8 +249,6 @@ class Pef_School extends BaseController
             $tehsils = $this->pef_school_model->getTehsilsByDistrict($districtId);
             echo json_encode($tehsils);
         }
-
-
     
     /**
      * This function is used to edit the user information
@@ -294,24 +271,18 @@ class Pef_School extends BaseController
                 $this->form_validation->set_rules('s_address', 'School Address', 'trim|required|max_length[255]');
                 $this->form_validation->set_rules('s_district_id', 'District ID', 'trim|required|numeric');
                 $this->form_validation->set_rules('s_tehsil_id', 'Tehsil ID', 'trim|required|numeric');
-
                 $this->form_validation->set_rules('s_level', 'School Level', 'trim|required|max_length[25]');
                 $this->form_validation->set_rules('s_status', 'Status', 'trim|required|numeric');
-
                 $this->form_validation->set_rules('s_owner_name', 'Owner Name', 'trim|required|max_length[255]');
                 $this->form_validation->set_rules('s_owner_cell', 'Owner Cell', 'trim|required|max_length[20]');
                 $this->form_validation->set_rules('s_email', 'Email', 'trim|valid_email|max_length[255]');
-
                 $this->form_validation->set_rules('username', 'Username', 'trim|max_length[255]');
                 $this->form_validation->set_rules('password', 'Password', 'trim|max_length[255]');
-
                 $this->form_validation->set_rules('s_department', 'Department', 'trim|max_length[100]');
                 $this->form_validation->set_rules('s_type', 'Type', 'trim|max_length[100]');
                 $this->form_validation->set_rules('s_gender', 'Gender', 'trim|max_length[100]');
-
                 $this->form_validation->set_rules('s_lat', 'Latitude', 'trim|decimal');
                 $this->form_validation->set_rules('s_long', 'Longitude', 'trim|decimal');
-
                 
                 // If validation fails, reload the edit view
                 if ($this->form_validation->run() === FALSE) {
@@ -330,21 +301,17 @@ class Pef_School extends BaseController
                     's_tehsil_id'   => $this->input->post('s_tehsil_id'),
                     's_level'       => $this->input->post('s_level'),
                     's_status'      => $this->input->post('s_status'),
-
                     // Owner Information
                     's_owner_name'  => $this->input->post('s_owner_name'),
                     's_owner_cell'  => $this->input->post('s_owner_cell'),
                     's_email'       => $this->input->post('s_email'),
-
                     // User Credentials
                     'username'      => $this->input->post('username'),
                     'password'      => $this->input->post('password'),
-
                     // Additional Information
                     's_department'  => $this->input->post('s_department'),
                     's_type'        => $this->input->post('s_type'),
                     's_gender'      => $this->input->post('s_gender'),
-
                     // Location Data
                     's_lat'         => $this->input->post('s_lat'),
                     's_long'        => $this->input->post('s_long'),
@@ -369,8 +336,6 @@ class Pef_School extends BaseController
                 $this->loadThis();
             }
         }
-
-
         
     /**
      * Page not found : error 404

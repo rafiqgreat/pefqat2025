@@ -15,9 +15,39 @@ class Center extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('center_model');
+        $this->load->model('Center_model','center_model');
+        $this->load->model('Sed_School_model','sed_school_model');
+            $this->load->model('Pef_School_model','pef_school_model');
 		$this->isLoggedIn();   
     }
+    public function editCenter($centerId = NULL)
+    {
+        if ($this->isAdmin() == FALSE ||$this->isCEO() == FALSE) {
+            if ($centerId == null) {
+                redirect('center/centerListing');
+            }
+
+            $data['centerInfo'] = $this->center_model->getCenterInfoById($centerId);
+            $data['districts'] = $this->sed_school_model->getAllDistricts();
+            $data['tehsils'] = $this->sed_school_model->getTehsilsByDistrict($data['schoolInfo']->school_district_id);
+            $this->global['pageTitle'] = 'Edit Center';
+            $this->loadViews("editCenterInfo", $this->global, $data, NULL);
+        } else {
+            $this->loadThis();
+        }
+    }
+    public function deleteCenter($centerId)
+    {
+		 $this->db->delete('tbl_staff', array('staff_cid' => $cid));
+		 $this->db->delete('tbl_examcenter_details', array('dcenter_id' => $cid));
+		 $this->db->delete('tbl_examcenter', array('cid' => $cid));
+		 $this->session->set_flashdata('success', 'Exam center deleted successfully.');
+		 redirect('center/centerListing'); 	 
+	 }
+        public function get_total_selected(){
+             $data = $this->pef_school_model->get_total_selected( $this->input->post('school_id'));
+                echo json_encode($data);
+        }
 
     public function addNewCenter(){
 
@@ -31,6 +61,7 @@ class Center extends BaseController
         $this->form_validation->set_rules('school_tehsil_id', 'Tehsil', 'required');
         $this->form_validation->set_rules('school_id', 'School', 'required');
         $this->form_validation->set_rules('username', 'School Code');
+        $this->form_validation->set_rules('total_students', 'total_students','required',);
 
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('centers');
@@ -39,6 +70,7 @@ class Center extends BaseController
             $tehsil_id = $this->input->post('school_tehsil_id');
             $school_id = $this->input->post('school_id');
             $school_code = $this->input->post('username');
+            $total_students = $this->input->post('total_students');
             $pefschools = $this->input->post('pefschools'); 
 
             $examCenterData = [
@@ -46,6 +78,7 @@ class Center extends BaseController
                 'cteshil_id' => $tehsil_id,
                 'csedschool_id' => $school_id,
                 'ccode' =>$school_code,
+                'cpef_students_selected' =>$total_students,
                 'cstatus' => 1,
                 'ccreated' => date('Y-m-d H:i:s'),
                 'ccreatedby' => $this->session->userdata('userId'),
@@ -120,7 +153,8 @@ class Center extends BaseController
     function centerListing()
     {
         if($this->isAdmin() === TRUE || $this->isCEO() === TRUE)        
-        {       
+        {  
+		       
             $searchText = $this->security->xss_clean($this->input->post('searchText'));
             $data['searchText'] = $searchText;
             
@@ -128,7 +162,7 @@ class Center extends BaseController
             
             $count = $this->center_model->centerListingCount($searchText);
             
-			$returns = $this->paginationCompress ( "centerListing/", $count, 10 );
+				$returns = $this->paginationCompress ( "centerListing/", $count, 10 );
             
             $data['centerRecords'] = $this->center_model->centerListing($searchText, $returns["page"], $returns["segment"]);
             // echo '<pre>';
@@ -200,28 +234,7 @@ class Center extends BaseController
     public function editCenterInfo (){
         
     }
-    /**
-     * This function is used to delete the center using centerId
-     * @return boolean $result : TRUE / FALSE
-     */
-    function deleteCenter()
-    {
-        if($this->isAdmin() == TRUE)
-        {
-            echo(json_encode(array('status'=>'access')));
-        }
-        else
-        {
-            $centerId = $this->input->post('centerId');
-            $centerInfo = array('isDeleted'=>1,'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
-            
-            $result = $this->center_model->deleteCenter($centerId, $centerInfo);
-            
-            if ($result > 0) { echo(json_encode(array('status'=>TRUE))); }
-            else { echo(json_encode(array('status'=>FALSE))); }
-        }
-    }
-    
+   
     /**
      * Page not found : error 404
      */

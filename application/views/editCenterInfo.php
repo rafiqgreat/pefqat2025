@@ -5,7 +5,7 @@
             <div class="col-lg-8">
                 <i class="fa fa-users"></i> <span style="font-size:20px; font-weight:bold">Exam Centers
                     Management</span>
-                <small>Add New Center</small>
+                <small>Edit Center</small>
             </div>
             <!-- <div class="col-lg-4">
 
@@ -50,17 +50,19 @@
             </div>
         </div>
 
-        <!-- Add Exam Center Form -->
+        <!-- edit Exam Center Form -->
         <div class="row">
             <div class="col-md-12">
-                <form method="POST" action="<?= base_url('center/addNewCenter') ?>">
+                <form method="POST" action="<?= base_url('center/updateCenter/' . $centerInfo->cid) ?>">
                     <div class="form-row">
                         <div class="form-group col-md-4 mb-3">
                             <label for="school_district_id">District</label>
                             <select name="school_district_id" id="school_district_id" class="form-control" required>
                                 <option value="">Select District</option>
                                 <?php foreach ($districts as $district): ?>
-                                <option value="<?= $district->district_id; ?>"><?= $district->district_name_en; ?>
+                                <option
+                                    <?php if($district->district_id == $centerInfo->cdistrict_id){ print 'selected="selected"';}?>
+                                    value="<?= $district->district_id; ?>"><?= $district->district_name_en; ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -71,25 +73,45 @@
                         </div>
                         <div class="form-group col-md-4 mb-3">
                             <label for="school_tehsil_id">Tehsil</label>
-                            <select class="form-control" id="school_tehsil_id" name="school_tehsil_id">
+                            <select name="school_tehsil_id" id="school_tehsil_id" class="form-control" required>
                                 <option value="">Select Tehsil</option>
+                                <?php foreach ($tehsils as $tehsil): ?>
+                                <option
+                                    <?php if($tehsil->tehsil_id == $centerInfo->cteshil_id){ print 'selected="selected"';}?>
+                                    value="<?= $tehsil->tehsil_id; ?>">
+                                    <?= $tehsil->tehsil_name_en; ?>
+                                </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="form-group col-md-4 mb-3">
                             <label for="school_id">School</label>
                             <select class="form-control" id="school_id" name="school_id" required>
                                 <option value="">Select School</option>
+                                <?php foreach ($schools as $school): ?>
+                                <option
+                                    <?php if($school->school_id == $centerInfo->csedschool_id){ print 'selected="selected"';}?>
+                                    value="<?= $school->school_id; ?>">
+                                    <?= $school->school_name; ?>
+                                </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div id="school-details" class="mt-4" style="">
                             <h3>Selected School Details</h3>
-                            <p><strong>School EMIS Code:</strong> <span id="school_id_display"></span> &nbsp; &nbsp;
-                                <strong>School Name:</strong> <span id="school_name_display"></span> &nbsp; &nbsp;
-                                <strong>School Address:</strong> <span id="school_address_display"></span> &nbsp; &nbsp;
-                                <strong>GPS Latitude:</strong> <span id="school_gps1_display"></span> &nbsp; &nbsp;
-                                <strong>GPS Longitude:</strong> <span id="school_gps2_display"></span>
+                            <p><strong>School EMIS Code:</strong> <span id="school_id_display"></span> &nbsp;
+                                &nbsp;<?php print $schoolInfo['username'];?>
+                                <strong>School Name:</strong> <span id="school_name_display"></span> &nbsp;
+                                &nbsp;<?php print $schoolInfo['school_name'];?>
+                                <strong>School Address:</strong> <span id="school_address_display"></span> &nbsp;
+                                &nbsp;<?php print $schoolInfo['school_address'];?>
+                                <strong>GPS Latitude:</strong> <span id="school_gps1_display"></span> &nbsp;
+                                &nbsp;<?php print $schoolInfo['school_lat'];?>
+                                <strong>GPS Longitude:</strong> <span
+                                    id="school_gps2_display"></span><?php print $schoolInfo['school_lon'];?>
                             </p>
                         </div>
                     </div>
@@ -105,6 +127,18 @@
                                     <select class="form-control pefschool" name="pefschools_<?= $i ?>"
                                         id="pefschool_<?= $i ?>">
                                         <option value="">Select PEF School</option>
+                                        <?php foreach ($pefschools as $pefschool): ?>
+                                        <option <?php if(isset($centerInfoSchoolDetails[$i-1]['dpefschool_id']))
+                                            {
+                                                if($pefschool->s_id == $centerInfoSchoolDetails[$i-1]['dpefschool_id'])
+                                                { 
+                                                    print 'selected="selected"';
+                                                }
+                                            }
+                                            ?> value="<?= $pefschool->s_id; ?>">
+                                            <?= $pefschool->s_name; ?>
+                                        </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
@@ -112,7 +146,8 @@
                                 <div class="form-group">
                                     <label for="students_<?= $i ?>">Selected Students:</label>
                                     <input type="number" name="students_<?= $i ?>" id="students_<?= $i ?>"
-                                        class="form-control pefcount" placeholder="Students count" readonly>
+                                        class="form-control pefcount" placeholder="Students count" value='<?php if(isset($centerInfoSchoolDetails[$i-1]['total_selected']))
+                                            { print $centerInfoSchoolDetails[$i-1]['total_selected'];}?>' readonly>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +166,7 @@
 
                     </div>
                     <div class="form-row">
-                        <button type="submit" class="btn btn-primary mt-3">Create Exam Center</button>
+                        <button type="submit" class="btn btn-primary mt-3">Update Exam Center</button>
                         <a href="<?= base_url('center/centerListing') ?>" class="btn-lg btn-secondary mt-3">Cancel</a>
                     </div>
 

@@ -15,8 +15,8 @@ class Sed_School extends BaseController
         public function __construct()
         {
             parent::__construct();
-            $this->load->model('sed_school_model');
-            $this->load->model('pef_school_model');
+            $this->load->model('Sed_School_model','sed_school_model');
+            $this->load->model('Pef_School_model','pef_school_model');
             $this->isLoggedIn();   
         }
         // public function ImportSchool(){
@@ -259,38 +259,6 @@ class Sed_School extends BaseController
         else { echo("false"); }
     }
     
-    /**
-     * This function is used load user edit information
-     * @param number $userId : Optional : This is user id
-     */
-    function editSedSchool__($schoolId = NULL)
-    {
-        if($this->isAdmin() == FALSE )
-         {
-            if($schoolId == null)
-            {
-                redirect('PefschoolListing');
-            }
-            $data['schoolInfo'] = $this->pef_school_model->getSedSchoolInfo($schoolId);
-            $this->global['pageTitle'] = 'PEF : Edit School';
-            $this->loadViews("editSedSchoolInfo", $this->global, $data, NULL);
-        }
-		else if ($this->isCEO() == FALSE)
-		{
-            if($schoolId == null)
-            {
-                redirect('PefschoolListing');
-            }
-            $data['schoolInfo'] = $this->pef_school_model->getPefSchoolInfoCEO($schoolId);
-            $this->global['pageTitle'] = 'PEF : Edit School ';
-            $this->loadViews("editPefSchoolInfo", $this->global, $data, NULL);
-        }
-        else
-        {
-            $this->loadThis();
-        }
-    }
-
     public function editSedSchool($schoolId = NULL)
     {
         if ($this->isAdmin() == FALSE ||$this->isCEO() == FALSE) {

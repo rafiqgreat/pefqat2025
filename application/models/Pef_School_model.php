@@ -8,6 +8,14 @@
  */
 class Pef_School_model extends CI_Model
 {
+    public function get_total_selected($schoolId)
+    {
+        $this->db->select('total_selected');
+        $this->db->from('tbl_schools_pef');
+        $this->db->where('s_id', $schoolId);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
 
     // Get all districts
 public function getAllDistricts()

@@ -1,3 +1,8 @@
+<style>
+.btnmargin{
+	margin-bottom:5px;
+}
+</style>
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -73,6 +78,10 @@
                                     <th>Center ID</th>
                                     <th>Center Code</th>
                                     <th>Tehsil</th>
+                                    <th>Center SED School</th>
+                                    <th>PEP Schools</th>
+                                    <th>PEF Students Available</th>
+                                    <th>PEF Students Selected</th>
                                     <th>Status</th>
                                     <th>Created On</th>
                                     <th class="text-center">Actions</th>
@@ -87,17 +96,53 @@
                                     <td><?php echo $record->cid; ?></td>
                                     <td><?php echo !empty($record->ccode) ? $record->ccode : 'N/A'; ?></td>
                                     <td><?php echo $record->tehsilName; ?></td>
+                                    <td><?php print $record->school_name.' ('.$record->username.')'; ?></td>
+                                    <td><?php print $record->cpefschools_total; ?></td>
+                                    <td><?php print $record->cpef_students_avail; ?></td>
+                                    <td><?php print $record->cpef_students_selected; ?></td>
                                     <td>
                                         <?php echo $record->cstatus == 1 ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Inactive</span>'; ?>
                                     </td>
                                     <td><?php echo date("d-m-Y H:i:s", strtotime($record->ccreated)); ?></td>
                                     <td class="text-center">
-                                        <a class="btn btn-sm btn-info"
-                                            href="<?php echo base_url() . 'Center/editCenterInfo/' . $record->cid; ?>"
-                                            title="Edit"><i class="fa fa-pencil"></i></a>
-                                        <a class="btn btn-sm btn-danger deleteCenter" href="#"
-                                            data-centerid="<?php echo $record->cid; ?>" title="Delete"><i
-                                                class="fa fa-trash"></i></a>
+                                    	<?php 
+													$staff = $this->center_model->getCenterStaffByCenterId($record->cid);
+													if($staff == 0)
+													{
+													?>
+                                    	<a class="btn btn-sm btn-primary btnmargin"
+                                            href="<?php echo base_url() . 'staff/staff_add/' . $record->cid; ?>"
+                                            title="Add Staff">Add Staff
+                                        </a>
+                                        <?php }
+													 else
+													 {?>
+                                        	<a class="btn btn-sm btn-info btnmargin"
+                                            href="<?php echo base_url() . 'staff/staff_edit/' . $record->cid; ?>"
+                                            title="Edit Staff">Edit Staff
+                                        </a>
+                                        <a class="btn btn-sm btn-info btnmargin"
+                                            href="<?php echo base_url() . 'staff/staff_view/' . $record->cid; ?>"
+                                            title="View Staff">View Staff
+                                        </a>
+                                        <a class="btn btn-sm btn-danger btnmargin"
+                                            href="<?php echo base_url().'staff/staff_delete/'.$record->cid; ?>"
+                                            title="Delete Staff"
+                                            onclick="return confirm('Are you sure you want to delete exam center staff?');">
+                                            <i class="fa fa-trash"></i> Delete Staff
+                                        </a>
+                                        <?php 
+													 }?>
+                                        <a class="btn btn-sm btn-info btnmargin"
+                                            href="<?php echo base_url() . 'Center/editCenter/' . $record->cid; ?>"
+                                            title="Edit"><i class="fa fa-pencil"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-danger btnmargin"
+                                            href="<?php echo base_url().'Center/deleteCenter/'.$record->cid; ?>"
+                                            title="Delete Center"
+                                            onclick="return confirm('Are you sure you want to delete this center?');">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 <?php
