@@ -1,6 +1,6 @@
 <style>
-.btnmargin{
-	margin-bottom:5px;
+.btnmargin {
+    margin-bottom: 5px;
 }
 </style>
 <div class="content-wrapper">
@@ -80,7 +80,7 @@
                                     <th>Tehsil</th>
                                     <th>Center SED School</th>
                                     <th>PEP Schools</th>
-                                    <th>PEF Students Available</th>
+                                    <!-- <th>PEF Students Available</th> -->
                                     <th>PEF Students Selected</th>
                                     <th>Status</th>
                                     <th>Created On</th>
@@ -98,26 +98,26 @@
                                     <td><?php echo $record->tehsilName; ?></td>
                                     <td><?php print $record->school_name.' ('.$record->username.')'; ?></td>
                                     <td><?php print $record->cpefschools_total; ?></td>
-                                    <td><?php print $record->cpef_students_avail; ?></td>
+                                    <!-- <td><?php print $record->cpef_students_avail; ?></td> -->
                                     <td><?php print $record->cpef_students_selected; ?></td>
                                     <td>
                                         <?php echo $record->cstatus == 1 ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Inactive</span>'; ?>
                                     </td>
                                     <td><?php echo date("d-m-Y H:i:s", strtotime($record->ccreated)); ?></td>
                                     <td class="text-center">
-                                    	<?php 
+                                        <?php 
 													$staff = $this->center_model->getCenterStaffByCenterId($record->cid);
 													if($staff == 0)
 													{
 													?>
-                                    	<a class="btn btn-sm btn-primary btnmargin"
+                                        <a class="btn btn-sm btn-primary btnmargin"
                                             href="<?php echo base_url() . 'staff/staff_add/' . $record->cid; ?>"
                                             title="Add Staff">Add Staff
                                         </a>
                                         <?php }
 													 else
 													 {?>
-                                        	<a class="btn btn-sm btn-info btnmargin"
+                                        <a class="btn btn-sm btn-info btnmargin"
                                             href="<?php echo base_url() . 'staff/staff_edit/' . $record->cid; ?>"
                                             title="Edit Staff">Edit Staff
                                         </a>

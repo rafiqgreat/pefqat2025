@@ -124,8 +124,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="school_<?= $i ?>">School <?= $i ?>:</label>
-                                    <select class="form-control pefschool" name="pefschools_<?= $i ?>"
-                                        id="pefschool_<?= $i ?>">
+                                    <select class="form-control pefschool" name="pefschools[]" id="pefschool_<?= $i ?>">
                                         <option value="">Select PEF School</option>
                                         <?php foreach ($pefschools as $pefschool): ?>
                                         <option <?php if(isset($centerInfoSchoolDetails[$i-1]['dpefschool_id']))
@@ -145,7 +144,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="students_<?= $i ?>">Selected Students:</label>
-                                    <input type="number" name="students_<?= $i ?>" id="students_<?= $i ?>"
+                                    <input type="number" name="students[]" id="students_<?= $i ?>"
                                         class="form-control pefcount" placeholder="Students count" value='<?php if(isset($centerInfoSchoolDetails[$i-1]['total_selected']))
                                             { print $centerInfoSchoolDetails[$i-1]['total_selected'];}?>' readonly>
                                 </div>

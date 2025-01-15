@@ -102,7 +102,8 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="school_<?= $i ?>">School <?= $i ?>:</label>
-                                    <select class="form-control pefschool" name="pefschools_<?= $i ?>"
+                                    <!-- <select class="form-control pefschool" name="pefschools_<?= $i ?>" -->
+                                    <select class="form-control pefschool" name="pefschools[]>"
                                         id="pefschool_<?= $i ?>">
                                         <option value="">Select PEF School</option>
                                     </select>

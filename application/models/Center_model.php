@@ -2,6 +2,16 @@
 
 class Center_model extends CI_Model
 {
+      function getCenterDetailInfoById($dcenter_id)
+    {
+        $this->db->select('dpefschool_id,total_selected');
+        $this->db->from('tbl_examcenter_details');
+        $this->db->where('dcenter_id', $dcenter_id);
+        $this->db->join('tbl_schools_pef', 's_id = dpefschool_id', 'left');
+        $query = $this->db->get();
+        
+        return $query->result_array();
+    }
         function centerListingCount($searchText = '')
         {
             $this->db->select('BaseTbl.cid');
