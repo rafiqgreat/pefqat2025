@@ -53,7 +53,7 @@
         <!-- Add Exam Center Form -->
         <div class="row">
             <div class="col-md-12">
-                <form method="POST" action="<?= base_url('center/addNewCenter') ?>">
+                <form id="examcenterfrm" method="POST" action="<?= base_url('center/addNewCenter') ?>">
                     <div class="form-row">
                         <div class="form-group col-md-4 mb-3">
                             <label for="school_district_id">District</label>
@@ -96,7 +96,7 @@
                     <div class="container mt-5">
                         <h3 class="mb-3">Select PEF Schools to Appear</h3>
                         <!-- School Rows -->
-                        <?php for ($i = 1; $i <= 6; $i++): ?>
+                        <?php for ($i = 1; $i <= 10; $i++): ?>
 
                         <div class="row mb-3">
                             <div class="col-md-3">
@@ -222,7 +222,8 @@ $(document).ready(function() {
                 },
                 dataType: 'json',
                 success: function(data) {
-                    if (data) {
+                    if (data) 
+						  {
                         // Display the school details
                         $('#school_id_display').text(data.username);
                         $('#school_name_display').text(data.school_name);
@@ -284,9 +285,9 @@ $(document).ready(function() {
                                 var ctrPefSchools = <?=$i; ?>;
                                 for (var x = 0; x < ctrPefSchools; x++) {
                                     $('#pefschool_' + x).html(schoolOptions);
+												$('#students_' + x).val('');
                                 }
-
-
+										  $('#total_students').val('');
                             },
                             error: function() {
                                 alert(
@@ -297,7 +298,9 @@ $(document).ready(function() {
 
 
                         ////////////////////////////////
-                    } else {
+                    } 
+						  else 
+						  {
                         // Clear the values if no data is found
                         $('#school_id_display').text('');
                         $('#school_name_display').text('');
@@ -311,52 +314,109 @@ $(document).ready(function() {
                     alert('Error fetching school details. Please try again.');
                 }
             });
-        } else {
+        } else 
+		  {
+			  let schoolOptions = '<option value="">Select PEF School</option>';
+				var ctrPefSchools = <?=$i; ?>;
+				for (var x = 0; x < ctrPefSchools; x++) {
+					$('#pefschool_' + x).html(schoolOptions);
+					$('#students_' + x).val('');
+				}
+				$('#total_students').val('');
             // Clear the values and keep the labels visible
             $('#school_id_display').text('');
             $('#school_name_display').text('');
             $('#school_address_display').text('');
+				$('#school_gps1_display').text('');
+				$('#school_gps2_display').text('');
             // Show the labels even when no school is selected
             $('#school-details').show();
         }
     });
 
-    $('.pefschool').change(function() {
-        const schoolId = $(this).val();
-        const index = $(this).attr('id').split('_')[1];
 
-        if (schoolId) {
-            $.ajax({
-                url: '<?= base_url("Center/get_total_selected") ?>',
-                type: 'POST',
-                data: {
-                    school_id: schoolId
-                },
-                dataType: 'json',
-                success: function(data) {
-                    if (data) {
-                        $('#students_' + index).val(data.total_selected);
-                        calculateTotalStudents();
-                    }
-                },
-                error: function() {
-                    alert('Error fetching Students details. Please try again.');
-                }
-            });
-        }
-    });
+    $(document).ready(function() {
+        // Delegate the change event to dynamically added .pefschool elements
+        $(document).on('change', '.pefschool', function () {
+				 const schoolId = $(this).val();
+				 const schoolName = $(this).find('option:selected').text().trim(); // Get the selected school's name and trim spaces
+				 const index = $(this).attr('id').split('_')[1];
+			
+				 // Check for duplicate selection, ignoring empty or default values
+				 if (schoolId) {
+					  let isDuplicate = false;
+			
+					  $('.pefschool').each(function () {
+							if ($(this).val() && $(this).val() === schoolId && $(this).attr('id') !== `pefschool_${index}`) {
+								 isDuplicate = true;
+								 return false; // Exit loop if a duplicate is found
+							}
+					  });
+			
+					  if (isDuplicate) {
+							alert(`The school "${schoolName}" has already been selected! Please choose a different school.`);
+							$('#pefschool_' + index).val(''); // Reset the dropdown to its default state
+							$('#students_' + index).val('');
+							calculateTotalStudents(); // Recalculate the total after resetting
+							return; // Exit the function
+					  }
+			
+					  // Fetch and update data for the selected school
+					  $.ajax({
+							url: '<?= base_url("Center/get_total_selected") ?>',
+							type: 'POST',
+							data: {
+								 school_id: schoolId
+							},
+							dataType: 'json',
+							success: function (data) {
+								 if (data) {
+									  // Update the student count for the selected school
+									  $('#students_' + index).val(data.total_selected);
+			
+									  // Recalculate the total number of students
+									  calculateTotalStudents();
+			
+									  // Check if the total exceeds 280
+									  const totalStudents = parseInt($('#total_students').val());
+									  if (totalStudents > 260) {
+											alert(`The total number of students (${totalStudents}) exceeds the limit of 260. Please select fewer students.`);
+											$('#pefschool_' + index).val(''); // Reset the dropdown to its default state
+											$('#students_' + index).val('');
+											calculateTotalStudents(); // Recalculate the total after resetting
+									  }
+								 }
+							},
+							error: function () {
+								 alert('Error fetching Students details. Please try again.');
+							}
+					  });
+				 } else {
+					  // Clear the student count if no school is selected
+					  $('#students_' + index).val('');
+					  calculateTotalStudents();
+				 }
+			});
 
-    // Function to calculate the total number of students
-    function calculateTotalStudents() {
-        let total = 0;
-        $('.pefcount').each(function() {
-            let value = parseInt($(this).val()) || 0;
-            total += value;
+			
+			// Function to calculate the total number of students
+			function calculateTotalStudents() {
+				 let total = 0;
+				 $('.pefcount').each(function () {
+					  let value = parseInt($(this).val()) || 0;
+					  total += value;
+				 });
+			
+				 // Update the total_students field
+				 $('#total_students').val(total);
+			}
+
+
+        // Trigger recalculation whenever .pefcount values change dynamically
+        $(document).on('input', '.pefcount', function() {
+            calculateTotalStudents();
         });
-
-        // Update the total_students field
-        $('#total_students').val(total);
-    }
+    });
 
 
 
@@ -409,4 +469,16 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
     return R * c; // Distance in kilometers
 }
+// Add submit event listener to the form
+$('#examcenterfrm').on('submit', function (e) {
+    const totalStudents = parseInt($('#total_students').val()) || 0; // Get the total students value
+
+    // Check if the total number of students is less than 240
+    if (totalStudents < 30) {
+        e.preventDefault(); // Stop form submission
+        alert('The total number of students must be at least 30. Please add more students before submitting.');
+        return false; // Ensure the function stops execution
+    }
+});
+
 </script>

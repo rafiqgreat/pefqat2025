@@ -35,11 +35,33 @@ public function getTehsilsByDistrict($districtId)
     {
         $this->db->select('*');
         $this->db->from('tbl_schools_pef');
+		  $this->db->join('tbl_examcenter_details', 'dpefschool_id = s_id', 'left');
+		  $this->db->where('(dpefschool_id` IS NULL OR `s_id` != `dpefschool_id`)');
         $this->db->where('s_tehsil_id', $tehsilId);
         $query = $this->db->get();
         return $query->result();
     }
-	
+	 
+	function getPefSchoolsByTehsilEdit($tehsilId,$dpefschool_ids)
+    {
+		 
+        $this->db->select('*');
+        $this->db->from('tbl_schools_pef');
+		  $this->db->join('tbl_examcenter_details', 'dpefschool_id = s_id', 'left');
+		  if($dpefschool_ids != '')
+		  {
+		  	$this->db->where('(dpefschool_id` IS NULL OR `s_id` != `dpefschool_id` OR dpefschool_id IN ('.$dpefschool_ids.'))');
+		  }
+		  else
+		  {
+			  $this->db->where('(dpefschool_id` IS NULL OR `s_id` != `dpefschool_id`)');
+		  }
+        $this->db->where('s_tehsil_id', $tehsilId);
+        $query = $this->db->get();
+		  //print $this->db->last_query(); die;
+        return $query->result();
+    }
+	 
 	function updateNulls()
 	{
 		//UPDATE tbl_schools SET Name_of_TA = NULL WHERE Name_of_TA = ''
@@ -92,9 +114,14 @@ public function getTehsilsByDistrict($districtId)
         if(!empty($searchText)) {
         $likeCriteria = "(BaseTbl.s_id  LIKE '%".$searchText."%'
                             OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.s_program  LIKE '%".$searchText."%'
-                            OR  BaseTbl.s_phase  LIKE '%".$searchText."%')";
+									 OR  BaseTbl.s_program  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_phase  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_address  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_cell  LIKE '%".$searchText."%'
+                            OR  BaseTbl.s_level  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);
         }
         $query = $this->db->get();
@@ -110,9 +137,14 @@ public function getTehsilsByDistrict($districtId)
         if(!empty($searchText)) {
         $likeCriteria = "(BaseTbl.s_id  LIKE '%".$searchText."%'
                             OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.s_program  LIKE '%".$searchText."%'
-                            OR  BaseTbl.s_phase  LIKE '%".$searchText."%')";
+									 OR  BaseTbl.s_program  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_phase  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_address  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_cell  LIKE '%".$searchText."%'
+                            OR  BaseTbl.s_level  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);
         }
 		$this->db->where('BaseTbl.s_district_id', $this->session->userdata('district'));
@@ -152,9 +184,14 @@ public function getTehsilsByDistrict($districtId)
         if(!empty($searchText)) {
             $likeCriteria = "(BaseTbl.s_id  LIKE '%".$searchText."%'
                             OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.s_program  LIKE '%".$searchText."%'
-                            OR  BaseTbl.s_phase  LIKE '%".$searchText."%')";
+									 OR  BaseTbl.s_program  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_phase  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_address  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_cell  LIKE '%".$searchText."%'
+                            OR  BaseTbl.s_level  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);
         }
         $this->db->order_by('BaseTbl.s_id', 'ASC');
@@ -171,9 +208,14 @@ public function getTehsilsByDistrict($districtId)
         if(!empty($searchText)) {
             $likeCriteria = "(BaseTbl.s_id  LIKE '%".$searchText."%'
                             OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.s_program  LIKE '%".$searchText."%'
-                            OR  BaseTbl.s_phase  LIKE '%".$searchText."%')";
+									 OR  BaseTbl.s_program  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_school_code  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_phase  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_address  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_name  LIKE '%".$searchText."%'
+									 OR  BaseTbl.s_owner_cell  LIKE '%".$searchText."%'
+                            OR  BaseTbl.s_level  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);			
         }
 		$this->db->where('BaseTbl.s_district_id', $this->session->userdata('district'));
@@ -288,17 +330,14 @@ public function getTehsilsByDistrict($districtId)
     }
 	
 	function get_pef_schools_csv_export(){
-		$this->db->select('*')
-		        ->select('s_id, s_program,s_school_code,s_phase,s_name,s_address,s_district_id,s_tehsil_id,s_owner_name,s_owner_cell,s_level,s_lat,s_long,s_status,')
-        //"school_id", "PEC_Sch_Code", "Sch_Admn_Body", "Sch_EMIS", "S_Name", "Sch_Per_Address", "District_Training_Centr", "Tehsil", "Sch_Level", "Sch_Type", "Sch_Area", "Grade", "Sch_Phone_No", "Sch_Head_Owner_Name", "Sch_Head_Owner_Phon_No", "Name_of_TA", "Designation", "Gender", "CNIC", "Cell_No", "Father_Name_as_per_CNIC", "DOB_as_per_CNIC", "Place_of_Posting"
+		$this->db->select('s_id, s_program,s_school_code,s_phase,s_name,s_address,s_district_id,s_tehsil_id,s_owner_name,s_owner_cell,s_level,s_lat,s_long,s_status')
 				 ->from('tbl_schools_pef');
-				 //->join('tbl_users', 'userId= updatedby');
 		$query = $this->db->get();
 		return $result = $query->result_array();
 	}
 	function get_pef_ae_schools_csv_export($District_Training_Centr){			
 			$this->db
-            ->select('s_id, s_program,s_school_code,s_phase,s_name,s_address,s_district_id,s_tehsil_id,s_owner_name,s_owner_cell,s_level,s_lat,s_long,s_status,')
+            ->select('s_id, s_program,s_school_code,s_phase,s_name,s_address,s_district_id,s_tehsil_id,s_owner_name,s_owner_cell,s_level,s_lat,s_long,s_status')
             //->select('*')
 					 ->from('tbl_schools_pef')
 					 ->where('s_district_id', $District_Training_Centr);

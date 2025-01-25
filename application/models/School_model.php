@@ -15,6 +15,22 @@ class School_model extends CI_Model
         $this->db->update('tbl_schools', ['Name_of_TA' => NULL]);
         return $this->db->affected_rows();
     }
+	 function getTotalCenterStaffStatics()
+    {
+        $this->db->select('e.cdistrict_id,district_name_en,
+								 COUNT(DISTINCT e.cid) AS total_cid,
+								 COUNT(s.staff_id) AS staff_count');
+        $this->db->from('tbl_examcenter e');
+		  $this->db->join('tbl_staff s', 'e.cid = s.staff_cid', 'left');
+		  $this->db->join('tbl_district', 'e.cdistrict_id = district_id', 'left');
+		  if ($this->session->userdata('role') == 2) {
+			  $this->db->where('e.cdistrict_id',$this->session->userdata('district'));
+		  }
+		  $this->db->group_by('e.cdistrict_id');
+		  $query = $this->db->get();
+        return $result = $query->result();
+    }
+	 
     function getStatisticsDistricts()
     {
         $this->db->select('school_district, COUNT(*) AS totalschools, COUNT(Name_of_TA) AS assignedSchools');
@@ -31,6 +47,29 @@ class School_model extends CI_Model
         $assingedSchools = $this->db->count_all_results();
         $totalSchools = $this->db->count_all('tbl_schools');
         return ['totalSchools' => $totalSchools, 'assignedSchools' => $assingedSchools, 'unassignedSchools' => ($totalSchools - $assingedSchools)];
+    }
+	 function getTotalCenterCreated()
+    {
+        $this->db->select('*');
+        $this->db->from('tbl_examcenter');
+		  if ($this->session->userdata('role') == 2) {
+				$this->db->where('cdistrict_id',$this->session->userdata('district'));
+			}
+        $totalCenter = $this->db->count_all_results();
+		  //print $this->db->last_query();die('123');
+        return ['totalCenter' => $totalCenter];
+    }
+	 function getTotalStaffAllocatedToCenters()
+    {
+        $this->db->select('*');
+        $this->db->from('tbl_staff');
+		  if ($this->session->userdata('role') == 2) {
+			   $this->db->join('tbl_examcenter', 'cid = staff_cid');
+				$this->db->where('cdistrict_id',$this->session->userdata('district'));
+			}
+        $totalStaff = $this->db->count_all_results();
+		  //print $this->db->last_query();die('123');
+        return ['totalStaff' => $totalStaff];
     }
     function getStatisticsSchoolsCEO()
     {

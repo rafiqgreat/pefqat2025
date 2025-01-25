@@ -17,14 +17,16 @@ class Center extends BaseController
         parent::__construct();
         $this->load->model('Center_model','center_model');
         $this->load->model('Sed_School_model','sed_school_model');
-            $this->load->model('Pef_School_model','pef_school_model');
-		$this->isLoggedIn();   
+        $this->load->model('Pef_School_model','pef_school_model');
+		  $this->isLoggedIn();   
     }
     public function editCenter($centerId)
     { 
         if ($this->isAdmin() == FALSE || $this->isCEO() == FALSE) {
             if ($centerId == null) {
-                redirect('center/centerListing');
+                 $this->loadThis();
+                 return;
+                // redirect('center/centerListing');
             }
 
             $data['centerInfo'] = $this->center_model->getCenterInfoById($centerId);
@@ -36,30 +38,18 @@ class Center extends BaseController
             $teshilId = $data['centerInfo']->cteshil_id;
             $schoolId = $data['centerInfo']->csedschool_id;
             $data['tehsils'] = $this->sed_school_model->getTehsilsByDistrict($districtId);
-            $data['schools'] = $this->sed_school_model->getSchoolsByTehsil($teshilId);
+				
+            $data['schools'] = $this->sed_school_model->getSchoolsByTehsilEdit($teshilId,$data['centerInfo']->csedschool_id);
             $data['schoolInfo'] = $this->sed_school_model->getSchoolsById($schoolId);
 
-            $data['pefschools'] = $this->pef_school_model->getPefSchoolsByTehsil($teshilId);
+            $selectedPefSchoolsIds = $this->center_model->getCenterPefSchoolIdsInfoById($centerId);
+				//print_r($selectedPefSchoolsIds); die;
+				$data['pefschools'] = $this->pef_school_model->getPefSchoolsByTehsilEdit($teshilId,$selectedPefSchoolsIds['dpefschool_ids']);
+				
             $centerInfoSchoolDetails = $this->center_model->getCenterDetailInfoById($centerId);
-            //print_r($centerInfoSchoolDetails);die;
+            // print_r($centerInfoSchoolDetails);die;
             $data['centerInfoSchoolDetails'] = $centerInfoSchoolDetails;
             
-            $this->global['pageTitle'] = 'Edit Center';
-            $this->loadViews("editCenterInfo", $this->global, $data, NULL);
-        } else {
-            $this->loadThis();
-        }
-    }
-    public function editCenter__($centerId = NULL)
-    {
-        if ($this->isAdmin() == FALSE ||$this->isCEO() == FALSE) {
-            if ($centerId == null) {
-                redirect('center/centerListing');
-            }
-
-            $data['centerInfo'] = $this->center_model->getCenterInfoById($centerId);
-            $data['districts'] = $this->sed_school_model->getAllDistricts();
-            $data['tehsils'] = $this->sed_school_model->getTehsilsByDistrict($data['schoolInfo']->school_district_id);
             $this->global['pageTitle'] = 'Edit Center';
             $this->loadViews("editCenterInfo", $this->global, $data, NULL);
         } else {
@@ -78,175 +68,84 @@ class Center extends BaseController
         public function get_total_selected(){
              $data = $this->pef_school_model->get_total_selected( $this->input->post('school_id'));
                 echo json_encode($data);
-        }
-      public function updateCenter_($centerId)
-    {
-            // $data=$this->input->post();
-            // echo '<pre>';
-            // print_r($data);
-            // die('2222');
-            // Load form validation library
-            $this->load->library('form_validation');
-            $this->form_validation->set_rules('school_district_id', 'District', 'required');
-            $this->form_validation->set_rules('school_tehsil_id', 'Tehsil', 'required');
-            $this->form_validation->set_rules('school_id', 'School', 'required');
-            $this->form_validation->set_rules('total_students', 'Total Students', 'required');
-
-            // Validate form input
-            if ($this->form_validation->run() == FALSE) {
-                $data['validation_errors'] = validation_errors();
-                $data['form_data'] = $this->input->post();
-                $this->load->view('centers', $data);
-            } else {
-                // Gather form inputs
-                $district_id = $this->input->post('school_district_id');
-                $tehsil_id = $this->input->post('school_tehsil_id');
-                $school_id = $this->input->post('school_id');
-                $total_students = $this->input->post('total_students');
-                $pefschools = $this->input->post('pefschools');  
-                $students = []; // To hold student counts for each PEF school
-                // Collect student counts for PEF schools
-                for ($i = 1; $i <= 6; $i++) {
-                    $students[$i] = $this->input->post("students_$i");
-                // Collect student counts for PEF schools
-        $students = [];
-        if (!empty($pefschools)) {
-            foreach ($pefschools as $key => $school) {
-                $students[$key] = $this->input->post("students_$key");
-            }
-        }
-
-        // Count total PEF schools
-        $total_pefschools = !empty($pefschools) ? count(array_filter($pefschools)) : 0;    
-                }
-
-            
-                // Prepare exam center data
-                $examCenterData = [
-                    'cdistrict_id' => $district_id,
-                    'cteshil_id' => $tehsil_id,
-                    'csedschool_id' => $school_id,
-                    'cpefschools_total' => $total_students,
-                    'cpefschools_total' => $total_pefschools,
-                    'cupdated' => date('Y-m-d H:i:s'),
-                    'cupdatedby' => $this->session->userdata('userId'),
-                ];
-                
-                echo '<pre>';
-            print_r($examCenterData);
-            die('2222');
-                // Update exam center
-                $this->db->where('cid', $centerId);
-                if (!$this->db->update('tbl_examcenter', $examCenterData)) {
-                    $this->session->set_flashdata('error', 'Failed to update exam center.');
-                    redirect('center/centerListing');
-                }
-
-                // Update exam center details
-                $this->db->where('dcenter_id', $centerId);
-                if (!$this->db->delete('tbl_examcenter_details')) {
-                    $this->session->set_flashdata('error', 'Failed to update exam center details.');
-                    redirect('center/centerListing');
-                }
-
-                $examCenterDetailsData = [];
-                for ($i = 1; $i <= 6; $i++) {
-                    if (!empty($pefschools[$i])) {
-                        $examCenterDetailsData[] = [
-                            'dcenter_id' => $centerId,
-                            'dpefschool_id' => $pefschools[$i],
-                            'total_selected' => isset($students[$i]) ? $students[$i] : 0,
-                        ];
-                    }
-                }
-
-                if (!empty($examCenterDetailsData) && !$this->db->insert_batch('tbl_examcenter_details', $examCenterDetailsData)) {
-                    $this->session->set_flashdata('error', 'Failed to insert exam center details.');
-                    redirect('center/centerListing');
-                }
-
-                // Redirect with success message
-                $this->session->set_flashdata('success', 'Exam center updated successfully.');
-                redirect('center/centerListing');
-            }
-    }  
+        }  
     
-    public function updateCenter($centerId)
-{
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('school_district_id', 'District', 'required');
-    $this->form_validation->set_rules('school_tehsil_id', 'Tehsil', 'required');
-    $this->form_validation->set_rules('school_id', 'School', 'required');
-    $this->form_validation->set_rules('total_students', 'Total Students', 'required');
-
-    if ($this->form_validation->run() == FALSE) 
-		  {
-			  $data = array(
-					'errors' => validation_errors()
-				);
-				$this->session->set_flashdata('error', $data['errors']);
-            redirect('Center/editCenter/'.$centerId);
-        } else {
-        $district_id = $this->input->post('school_district_id');
-        $tehsil_id = $this->input->post('school_tehsil_id');
-        $school_id = $this->input->post('school_id');
-        print $total_students = $this->input->post('total_students');
-        $pefschools = $this->input->post('pefschools');
-
-        // Collect student counts for PEF schools
-        $students = [];
-        if (!empty($pefschools)) {
-            foreach ($pefschools as $key => $school) {
-                $students[$key] = $this->input->post("students_$key");
-            }
-        }
-
-        // Count total PEF schools
-         $total_pefschools = !empty($pefschools) ? count(array_filter($pefschools)) : 0;
-        // Prepare exam center data
-        $examCenterData = [
-            'cdistrict_id' => $district_id,
-            'cteshil_id' => $tehsil_id,
-            'csedschool_id' => $school_id,
-            'cpefschools_total' => $total_students,
-            'cpefschools_total' => $total_pefschools,
-            'cupdated' => date('Y-m-d H:i:s'),
-            'cupdatedby' => $this->session->userdata('userId'),
-        ];
-        // Update exam center
-        $this->db->where('cid', $centerId);
-        if (!$this->db->update('tbl_examcenter', $examCenterData)) {
-            $this->session->set_flashdata('error', 'Failed to update exam center.');
-            redirect('center/centerListing');
-        }
-
-        // Update exam center details
-        $this->db->where('dcenter_id', $centerId);
-        if (!$this->db->delete('tbl_examcenter_details')) {
-            $this->session->set_flashdata('error', 'Failed to update exam center details.');
-            redirect('center/centerListing');
-        }
-
-        $examCenterDetailsData = [];
-        foreach ($pefschools as $key => $school_id) {
-            if (!empty($school_id)) {
-                $examCenterDetailsData[] = [
-                    'dcenter_id' => $centerId,
-                    'dpefschool_id' => $school_id,
-                    // 'total_selected' => isset($students[$key]) ? $students[$key] : 0,
-                ];
-            }
-        }
-
-        if (!empty($examCenterDetailsData) && !$this->db->insert_batch('tbl_examcenter_details', $examCenterDetailsData)) {
-            $this->session->set_flashdata('error', 'Failed to insert exam center details.');
-            redirect('center/centerListing');
-        }
-
-        $this->session->set_flashdata('success', 'Exam center updated successfully.');
-        redirect('center/centerListing');
-    }
-}
+   public function updateCenter($centerId)
+	{
+		 $this->load->library('form_validation');
+		 $this->form_validation->set_rules('school_district_id', 'District', 'required');
+		 $this->form_validation->set_rules('school_tehsil_id', 'Tehsil', 'required');
+		 $this->form_validation->set_rules('school_id', 'School', 'required');
+		 $this->form_validation->set_rules('total_students', 'Total Students', 'required');
+	
+		 if ($this->form_validation->run() == FALSE) 
+			  {
+				  $data = array(
+						'errors' => validation_errors()
+					);
+					$this->session->set_flashdata('error', $data['errors']);
+					redirect('Center/editCenter/'.$centerId);
+			  } else {
+			  $district_id = $this->input->post('school_district_id');
+			  $tehsil_id = $this->input->post('school_tehsil_id');
+			  $school_id = $this->input->post('school_id');
+			  $total_students = $this->input->post('total_students');
+			  $pefschools = $this->input->post('pefschools');
+	
+			  // Collect student counts for PEF schools
+			  $students = [];
+			  if (!empty($pefschools)) {
+					foreach ($pefschools as $key => $school) {
+						 $students[$key] = $this->input->post("students_$key");
+					}
+			  }
+	
+			  // Count total PEF schools
+				$total_pefschools = !empty($pefschools) ? count(array_filter($pefschools)) : 0;
+			  // Prepare exam center data
+			  $examCenterData = [
+					'cdistrict_id' => $district_id,
+					'cteshil_id' => $tehsil_id,
+					'csedschool_id' => $school_id,
+					'cpef_students_selected' => $total_students,
+					'cpefschools_total' => $total_pefschools,
+					'cupdated' => date('Y-m-d H:i:s'),
+					'cupdatedby' => $this->session->userdata('userId'),
+			  ];
+			  // Update exam center
+			  $this->db->where('cid', $centerId);
+			  if (!$this->db->update('tbl_examcenter', $examCenterData)) {
+					$this->session->set_flashdata('error', 'Failed to update exam center.');
+					redirect('center/centerListing');
+			  }
+	
+			  // Update exam center details
+			  $this->db->where('dcenter_id', $centerId);
+			  if (!$this->db->delete('tbl_examcenter_details')) {
+					$this->session->set_flashdata('error', 'Failed to update exam center details.');
+					redirect('center/centerListing');
+			  }
+	
+			  $examCenterDetailsData = [];
+			  foreach ($pefschools as $key => $school_id) {
+					if (!empty($school_id)) {
+						 $examCenterDetailsData[] = [
+							  'dcenter_id' => $centerId,
+							  'dpefschool_id' => $school_id,
+							  // 'total_selected' => isset($students[$key]) ? $students[$key] : 0,
+						 ];
+					}
+			  }
+	
+			  if (!empty($examCenterDetailsData) && !$this->db->insert_batch('tbl_examcenter_details', $examCenterDetailsData)) {
+					$this->session->set_flashdata('error', 'Failed to insert exam center details.');
+					redirect('center/centerListing');
+			  }
+			  $this->db->delete('tbl_staff', array('staff_cid' => $centerId));
+			  $this->session->set_flashdata('success', 'Exam center updated successfully.');
+			  redirect('center/centerListing');
+		 }
+	}
 
 
     public function addNewCenter(){
@@ -322,71 +221,76 @@ class Center extends BaseController
     public function index()
     {
         $this->global['pageTitle'] = 'PEC : Dashboard';
-		$this->load->model('school_model');
-		$data=[];
+			$this->load->model('school_model');
+			$data=[];
+			//updateNulls
+			$this->school_model->updateNulls();	
 		
-		//updateNulls
-		$this->school_model->updateNulls();	
-		
-		if($this->isAdmin() == FALSE)
-        {
-			$schoolStats = $this->school_model->getStatisticsSchools();	
-			$data['districtStats'] = $this->school_model->getStatisticsDistricts();
-        }
-		else
-		{
-			$schoolStats = $this->school_model->getStatisticsSchoolsCEO();	
-		}
-		$data['stats'] = $schoolStats;		
-        $this->loadViews("dashboard", $this->global, $data, NULL);
+			if($this->isAdmin() == FALSE)
+			{
+				$schoolStats = $this->school_model->getStatisticsSchools();	
+				$data['districtStats'] = $this->school_model->getStatisticsDistricts();
+			}
+			else
+			{
+				$schoolStats = $this->school_model->getStatisticsSchoolsCEO();	
+			}
+			$data['stats'] = $schoolStats;		
+         $this->loadViews("dashboard", $this->global, $data, NULL);
     }
     
 	
 	 public function getPefSchoolsByTehsil()
-            {
-		 
-                $tehsilId = $this->input->get('tehsil_id'); 
-                if ($tehsilId) {
-                    $this->load->model('pef_school_model'); 
-                    $schools = $this->pef_school_model->getPefSchoolsByTehsil($tehsilId); 
-                   
-                    echo json_encode($schools);
-                } else {
-                    echo json_encode([]);
-                }
-            }
+	 {
+		 $tehsilId = $this->input->get('tehsil_id'); 
+		 if ($tehsilId) {
+			  $this->load->model('pef_school_model'); 
+			  $schools = $this->pef_school_model->getPefSchoolsByTehsil($tehsilId); 
+			 
+			  echo json_encode($schools);
+		 } else {
+			  echo json_encode([]);
+		 }
+	}
+	
+	public function getPefSchoolsByTehsilEdit()
+	 {
+		 $tehsilId = $this->input->get('tehsil_id');
+		 $centerId = $this->input->get('centerId');
+		 $selectedPefSchoolsIds = $this->center_model->getCenterPefSchoolIdsInfoById($centerId); 
+		 if ($tehsilId) {
+			  $this->load->model('pef_school_model'); 
+			  $schools = $this->pef_school_model->getPefSchoolsByTehsilEdit($tehsilId,$selectedPefSchoolsIds['dpefschool_ids']); 
+			 
+			  echo json_encode($schools);
+		 } else {
+			  echo json_encode([]);
+		 }
+	}
 	
     /**
      * This function is used to load the Center list
      */
-    function centerListing()
-    {
-        if($this->isAdmin() === TRUE || $this->isCEO() === TRUE)        
-        {  
-		       
-            $searchText = $this->security->xss_clean($this->input->post('searchText'));
-            $data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->center_model->centerListingCount($searchText);
-            
-				$returns = $this->paginationCompress ( "centerListing/", $count, 10 );
-            
-            $data['centerRecords'] = $this->center_model->centerListing($searchText, $returns["page"], $returns["segment"]);
-            // echo '<pre>';
-			// print_r($data['centerRecords']);
-			// die();
-            $this->global['pageTitle'] = 'PEC : center Listing';
-            
-            $this->loadViews("centers", $this->global, $data, NULL);
-        }
+	function centerListing()
+	{
+		if($this->isAdmin() === TRUE || $this->isCEO() === TRUE)        
+		{  
+			$searchText = $this->security->xss_clean($this->input->post('searchText'));
+			$data['searchText'] = $searchText;            
+			$this->load->library('pagination');            
+			$count = $this->center_model->centerListingCount($searchText);            
+			$returns = $this->paginationCompress ( "centerListing/", $count, 10 ); 
+			//print '<pre>'; print_r($returns); die;
+			$data['centerRecords'] = $this->center_model->centerListing($searchText, $returns["page"], $returns["segment"]);
+			$this->global['pageTitle'] = 'PEC : Center Listing';            
+			$this->loadViews("centers", $this->global, $data, NULL);
+		}
 		else
 		{
-            $this->loadThis();
-        }
-        
-    }
+			$this->loadThis();
+		}
+	  
+	}
   
     /**
      * This function is used to load the add new form
@@ -440,9 +344,7 @@ class Center extends BaseController
     /**
      * This function is used to edit the center information
      */
-    public function editCenterInfo (){
-        
-    }
+   
    
     /**
      * Page not found : error 404

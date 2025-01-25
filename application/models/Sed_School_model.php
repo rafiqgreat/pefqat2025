@@ -57,14 +57,35 @@ public function getTehsilsByDistrict($districtId)
 		
 		return ['totalSchools'=>$totalSchools,'assignedSchools'=>$assingedSchools,'unassignedSchools'=>($totalSchools-$assingedSchools)];
 	}
-    function getSchoolsByTehsil($tehsilId)
+    function getSchoolsByTehsilEdit($tehsilId,$csedschool_id)
     {
-        $this->db->select('*');
+		  $this->db->select('*');
         $this->db->from('tbl_schools_sed');
+		  $this->db->join('tbl_examcenter', 'csedschool_id = school_id', 'left');
+		  if($csedschool_id != '')
+		 {
+		  $this->db->where('(csedschool_id` IS NULL OR `school_id` != `csedschool_id` OR csedschool_id = '.$csedschool_id.')');
+		 }
+		 else
+		 {
+			 $this->db->where('(csedschool_id` IS NULL OR `school_id` != `csedschool_id`)');
+		 }
         $this->db->where('school_tehsil_id', $tehsilId);
         $query = $this->db->get();
         return $query->result();
     }
+	 function getSchoolsByTehsil($tehsilId)
+    {
+        $this->db->select('*');
+        $this->db->from('tbl_schools_sed');
+		  $this->db->join('tbl_examcenter', 'csedschool_id = school_id', 'left');
+		  $this->db->where('(csedschool_id` IS NULL OR `school_id` != `csedschool_id`)');
+        $this->db->where('school_tehsil_id', $tehsilId);
+        $query = $this->db->get();
+		 // print $this->db->last_query(); die();
+        return $query->result();
+    }
+
 
     function getSchoolsById($schoolId)
     {
@@ -78,26 +99,7 @@ public function getTehsilsByDistrict($districtId)
      * This function is used to get the user listing count
      * @param string $searchText : This is optional search text
      * @return number $count : This is row count
-     */
-    function SedschoolListingCount($searchText = '')
-    {
-        $this->db->select('*');
-        $this->db->from('tbl_schools_sed as BaseTbl');        
-        if(!empty($searchText)) {
-        $likeCriteria = "(
-                            BaseTbl.school_id  LIKE '%".$searchText."%'
-                            OR  BaseTbl.username  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.school_name  LIKE '%".$searchText."%'
-                            OR  BaseTbl.school_address  LIKE '%".$searchText."%'
-                            OR  BaseTbl.school_email  LIKE '%".$searchText."%'
-                            )";
-            $this->db->where($likeCriteria);
-        }
-        $query = $this->db->get();
-        
-        return $query->num_rows();
-    }
+     */    
 	 function SedschoolListingCountCEO($searchText = '')
     {
         $this->db->select('*');
@@ -143,26 +145,51 @@ public function getTehsilsByDistrict($districtId)
 		$query = $this->db->get();
         return $query->result();        
 	}
-    function SedschoolListing($searchText = '', $page, $segment)
-    {
-        $this->db->select('*');
-        $this->db->from('tbl_schools_sed as BaseTbl');        		
-        if(!empty($searchText)) {
-            $likeCriteria = "(BaseTbl.school_id  LIKE '%".$searchText."%'
-                            OR  BaseTbl.username  LIKE '%".$searchText."%'
-							
-							OR  BaseTbl.school_name  LIKE '%".$searchText."%'
-                            OR  BaseTbl.school_address  LIKE '%".$searchText."%'
-                            OR  BaseTbl.school_email  LIKE '%".$searchText."%')";
-            $this->db->where($likeCriteria);
-        }
-        $this->db->order_by('BaseTbl.school_id', 'ASC');
-        $this->db->limit($page, $segment);
-        $query = $this->db->get();
-        
-        $result = $query->result();        
-        return $result;
-    }
+	
+	function SedschoolListingCount($searchText = '')
+	{
+		$this->db->select('*');
+		$this->db->from('tbl_schools_sed as BaseTbl');        
+		if(!empty($searchText)) {
+		$likeCriteria = "(BaseTbl.school_id  LIKE '%".$searchText."%'
+								 OR  BaseTbl.username  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_name  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_address  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_level  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_contact_name  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_phone  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_address  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_contact_mobile  LIKE '%".$searchText."%')";
+			$this->db->where($likeCriteria);
+		}
+		$query = $this->db->get();
+		
+		return $query->num_rows();
+	}
+	 
+	function SedschoolListing($searchText = '', $page, $segment)
+	{
+		$this->db->select('*');
+		$this->db->from('tbl_schools_sed as BaseTbl');        		
+		if(!empty($searchText)) {
+			$likeCriteria = "(BaseTbl.school_id  LIKE '%".$searchText."%'
+								 OR  BaseTbl.username  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_name  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_address  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_level  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_contact_name  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_phone  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_address  LIKE '%".$searchText."%'
+								 OR  BaseTbl.school_contact_mobile  LIKE '%".$searchText."%')";
+			$this->db->where($likeCriteria);
+		}
+		$this->db->order_by('BaseTbl.school_id', 'ASC');
+		$this->db->limit($page, $segment);
+		$query = $this->db->get();
+		
+		$result = $query->result();        
+		return $result;
+	}
      function SedschoolListingCEO($searchText = '', $page, $segment)
     {
         $this->db->select('*');
@@ -288,17 +315,13 @@ public function getTehsilsByDistrict($districtId)
     }
 	
 	function get_sed_schools_csv_export(){
-		$this->db->select('*')
-		        ->select("school_id", "username","school_department","school_type","school_name","school_address","school_district_id","school_tehsil_id","school_level","school_gender","school_email","school_phone","school_contact_name","school_contact_mobile","school_lat","school_lon","school_status")
-        //"school_id", "PEC_Sch_Code", "Sch_Admn_Body", "Sch_EMIS", "S_Name", "Sch_Per_Address", "District_Training_Centr", "Tehsil", "Sch_Level", "Sch_Type", "Sch_Area", "Grade", "Sch_Phone_No", "Sch_Head_Owner_Name", "Sch_Head_Owner_Phon_No", "Name_of_TA", "Designation", "Gender", "CNIC", "Cell_No", "Father_Name_as_per_CNIC", "DOB_as_per_CNIC", "Place_of_Posting"
+		$this->db->select('school_id, username,school_department,school_type,school_name,school_address,school_district_id,school_tehsil_id,school_level,school_gender,school_email,school_phone,school_contact_name,school_contact_mobile,school_lat,school_lon,school_status')
 				 ->from('tbl_schools_sed');
-				 //->join('tbl_users', 'userId= updatedby');
 		$query = $this->db->get();
 		return $result = $query->result_array();
 	}
 	function get_sed_ae_schools_csv_export($District_Training_Centr){			
-			$this->db
-            ->select("school_id", "username","school_department","school_type","school_name","school_address","school_district_id","school_tehsil_id","school_level","school_gender","school_email","school_phone","school_contact_name","school_contact_mobile","school_lat","school_lon","school_status")
+			$this->db->select('school_id, username,school_department,school_type,school_name,school_address,school_district_id,school_tehsil_id,school_level,school_gender,school_email,school_phone,school_contact_name,school_contact_mobile,school_lat,school_lon,school_status')
             //->select('*')
 					 ->from('tbl_schools_sed')
 					 ->where('school_district_id', $District_Training_Centr);

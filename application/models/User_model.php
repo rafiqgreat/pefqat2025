@@ -77,7 +77,7 @@ class User_model extends CI_Model
     {
         $this->db->select('district_id, district_name_en');
         $this->db->from('tbl_district');
-        $this->db->where('district_id !=', 1);
+       // $this->db->where('district_id !=', 1);
         $query = $this->db->get();
         
         return $query->result();

@@ -24,24 +24,26 @@ class User extends BaseController
      */
     public function index()
     {
-        $this->global['pageTitle'] = 'PEC : Dashboard';
+		$this->global['pageTitle'] = 'PEC : Dashboard';
 		$this->load->model('school_model');
 		$data=[];
 		
 		//updateNulls
 		$this->school_model->updateNulls();	
-		
+		$totalCenter = $this->school_model->getTotalCenterCreated();
+		$totalStaff = $this->school_model->getTotalStaffAllocatedToCenters();
+		$data['districtStats'] = $this->school_model->getTotalCenterStaffStatics();
 		if($this->isAdmin() == FALSE)
-        {
-			$schoolStats = $this->school_model->getStatisticsSchools();	
-			$data['districtStats'] = $this->school_model->getStatisticsDistricts();
-        }
+		{	
+			//$data['districtStats'] = $this->school_model->getStatisticsDistricts();
+		}
 		else
 		{
 			$schoolStats = $this->school_model->getStatisticsSchoolsCEO();	
 		}
-		$data['stats'] = $schoolStats;		
-        $this->loadViews("dashboard", $this->global, $data, NULL);
+		$data['stats'] = $totalCenter;
+		$data['staff'] = $totalStaff;		
+		$this->loadViews("dashboard", $this->global, $data, NULL);
     }
     
     /**
@@ -61,7 +63,7 @@ class User extends BaseController
             $this->load->library('pagination');
             
             $count = $this->user_model->userListingCount($searchText);
-			$returns = $this->paginationCompress ( "userListing/", $count, 10 );
+			   $returns = $this->paginationCompress ( "userListing/", $count, 10 );
             
             $data['userRecords'] = $this->user_model->userListing($searchText, $returns["page"], $returns["segment"]);
             //echo '<pre>';

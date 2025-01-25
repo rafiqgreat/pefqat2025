@@ -67,7 +67,7 @@
                 <!-- Sidebar toggle button-->
                 <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"> <span class="sr-only">Toggle
                         navigation</span> </a> <span
-                    style="font-weight: bold; font-size: 20px; color: white; margin-left:20px; padding-top: 20px; ">Welcome
+                    style="font-weight: bold; font-size: 20px; color: white; margin-left:20px; padding-top: 20px; line-height: 50px;">Welcome
                     <?php echo $this->session->userdata('roleText').' '.$this->session->userdata('district_name').' '.$this->session->userdata('name'); 
 				
 				//print_r($this->session->userdata('role')); //die();

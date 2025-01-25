@@ -116,43 +116,42 @@ class Pef_School extends BaseController
      * This function is used to load the user list
      */
 	function PefschoolListing()
-    {
-        if($this->isAdmin() == FALSE)
-        {
+	{
+		if($this->isAdmin() == FALSE)
+		{
 			$searchText = $this->security->xss_clean($this->input->post('searchText'));
-            $data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->pef_school_model->PefschoolListingCount($searchText);
+			$data['searchText'] = $searchText;
+			
+			$this->load->library('pagination');
+			
+			$count = $this->pef_school_model->PefschoolListingCount($searchText);
 			$returns = $this->paginationCompress ( "PefschoolListing/", $count, 10 );
-            
-            $data['schoolRecords'] = $this->pef_school_model->PefschoolListing($searchText, $returns["page"], $returns["segment"]);
-				// Get the total number of records
-    		 $total_schools = $this->pef_school_model->count_records();
 			
-			 $data['total_records'] = $total_schools[0]->totalschools;
+			$data['schoolRecords'] = $this->pef_school_model->PefschoolListing($searchText, $returns["page"], $returns["segment"]);
+			// Get the total number of records
+			$total_schools = $this->pef_school_model->count_records();
 			
-            $this->global['pageTitle'] = 'PEC : Pef Schools Listing';
-            $this->loadViews("Pefschools", $this->global, $data, NULL);
+			$data['total_records'] = $total_schools[0]->totalschools;
+			
+			$this->global['pageTitle'] = 'PEC : Pef Schools Listing';
+			$this->loadViews("Pefschools", $this->global, $data, NULL);
 		}
 		else if ($this->isCEO() == FALSE)
 		{
-        
 			$total_schools = $this->pef_school_model->PefschoolListingCountCEO();
 			$data['total_records'] = $total_schools;  
 			$searchText = $this->security->xss_clean($this->input->post('searchText'));
 			$data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->pef_school_model->PefschoolListingCountCEO($searchText);
+			
+			$this->load->library('pagination');
+			
+			$count = $this->pef_school_model->PefschoolListingCountCEO($searchText);
 			$returns = $this->paginationCompress ( "PefschoolListing/", $count, 10 );
-            
-            $data['schoolRecords'] = $this->pef_school_model->PefschoolListingCEO($searchText, $returns["page"], $returns["segment"]);
-            $this->global['pageTitle'] = 'PEF : Schools Listing';
-            
-            $this->loadViews("Pefschools", $this->global, $data, NULL);
+			
+			$data['schoolRecords'] = $this->pef_school_model->PefschoolListingCEO($searchText, $returns["page"], $returns["segment"]);
+			$this->global['pageTitle'] = 'PEF : Schools Listing';
+			
+			$this->loadViews("Pefschools", $this->global, $data, NULL);
         }
         else
         {        

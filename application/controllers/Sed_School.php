@@ -43,20 +43,28 @@ class Sed_School extends BaseController
                 }
             }
         public function getSchoolsByTehsil()
-            {
-                $tehsilId = $this->input->get('tehsil_id'); 
-                if ($tehsilId) {
-                    $this->load->model('sed_school_model'); 
-                    $schools = $this->sed_school_model->getSchoolsByTehsil($tehsilId); 
-
-                    // echo '<pre>';
-                    // print_r($schools);
-                    // die('lllllllllllll');
-                    echo json_encode($schools);
-                } else {
-                    echo json_encode([]);
-                }
-            }
+			{
+				 $tehsilId = $this->input->get('tehsil_id'); 
+				 if ($tehsilId) {
+					  $this->load->model('sed_school_model'); 
+					  $schools = $this->sed_school_model->getSchoolsByTehsil($tehsilId);
+					  echo json_encode($schools);
+				 } else {
+					  echo json_encode([]);
+				 }
+			}
+			public function getSchoolsByTehsilEdit()
+			{
+				 $tehsilId = $this->input->get('tehsil_id'); 
+				 $csedschool_id = $this->input->get('csedschool_id');
+				 if ($tehsilId) {
+					  $this->load->model('sed_school_model'); 
+					  $schools = $this->sed_school_model->getSchoolsByTehsilEdit($tehsilId,$csedschool_id);
+					  echo json_encode($schools);
+				 } else {
+					  echo json_encode([]);
+				 }
+			}
         public function getSchoolsById()
             {
                 $schoolId = $this->input->get('school_id'); 
@@ -78,43 +86,42 @@ class Sed_School extends BaseController
      * This function is used to load the user list
      */
 	    function SedschoolListing()
-    {
+    	 {
          if($this->isAdmin() == FALSE)
-        {
-			$searchText = $this->security->xss_clean($this->input->post('searchText'));
-            $data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->sed_school_model->SedschoolListingCount($searchText);
-			$returns = $this->paginationCompress ( "SedschoolListing/", $count, 10 );
-            
-            $data['schoolRecords'] = $this->sed_school_model->SedschoolListing($searchText, $returns["page"], $returns["segment"]);
+         {
+				$searchText = $this->security->xss_clean($this->input->post('searchText'));
+				$data['searchText'] = $searchText;
+				
+				$this->load->library('pagination');
+				
+				$count = $this->sed_school_model->SedschoolListingCount($searchText);
+				$returns = $this->paginationCompress ( "SedschoolListing/", $count, 10 );
+				
+				$data['schoolRecords'] = $this->sed_school_model->SedschoolListing($searchText, $returns["page"], $returns["segment"]);
 				// Get the total number of records
-    		 $total_schools = $this->sed_school_model->count_records();
-			
-			 $data['total_records'] = $total_schools[0]->totalschools;
-			
-            $this->global['pageTitle'] = 'PEC : SED Schools Listing';
-            $this->loadViews("Sedschools", $this->global, $data, NULL);
+				$total_schools = $this->sed_school_model->count_records();
+				
+				$data['total_records'] = $total_schools[0]->totalschools;
+				
+				$this->global['pageTitle'] = 'PEC : SED Schools Listing';
+				$this->loadViews("Sedschools", $this->global, $data, NULL);
 		}
 		else if ($this->isCEO() == FALSE)
-		{
-        
+		{        
 			$total_schools = $this->sed_school_model->SedschoolListingCountCEO();
 			$data['total_records'] = $total_schools;  
 			$searchText = $this->security->xss_clean($this->input->post('searchText'));
 			$data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->sed_school_model->SedschoolListingCountCEO($searchText);
+			
+			$this->load->library('pagination');
+			
+			$count = $this->sed_school_model->SedschoolListingCountCEO($searchText);
 			$returns = $this->paginationCompress ( "SedschoolListing/", $count, 10 );
-            
-            $data['schoolRecords'] = $this->sed_school_model->SedschoolListingCEO($searchText, $returns["page"], $returns["segment"]);
-            $this->global['pageTitle'] = 'SED : Schools Listing';
-            
-            $this->loadViews("Sedschools", $this->global, $data, NULL);
+			
+			$data['schoolRecords'] = $this->sed_school_model->SedschoolListingCEO($searchText, $returns["page"], $returns["segment"]);
+			$this->global['pageTitle'] = 'SED : Schools Listing';
+			
+			$this->loadViews("Sedschools", $this->global, $data, NULL);
         }
         else
         {        
@@ -382,7 +389,8 @@ class Sed_School extends BaseController
         $this->loadViews("404", $this->global, NULL, NULL);
     } 
 	
-	public function export_sed_school_csv(){ 
+	public function export_sed_school_csv()
+	{ 
 		$filename = 'schools_'.date('Y-m-d').'.csv'; 
 		header("Content-Description: File Transfer"); 
 		header("Content-Disposition: attachment; filename=$filename"); 
